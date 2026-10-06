@@ -3,9 +3,9 @@
   "condition": "baseline",
   "role": "learn",
   "error": null,
-  "timestamp": "2026-10-06T15:28:49.224751+00:00",
+  "timestamp": "2026-10-06T17:02:09.114146+00:00",
   "skills_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "seconds": 222.0,
+  "seconds": 180.1,
   "tokens": {
     "input": 12718,
     "output": 16422,
@@ -23,47 +23,47 @@
     {
       "name": "valid_structure",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     },
     {
       "name": "entry_count",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     },
     {
       "name": "timestamps_utc",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     },
     {
       "name": "exception_fields",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     },
     {
       "name": "repeat_counts",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     },
     {
       "name": "counts_by_service",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     },
     {
       "name": "rule_service_names",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     },
     {
       "name": "rule_sorted_errors",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     },
     {
       "name": "rule_schema_header",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-poho552l\\\\workspace\\\\errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\KN\\\\AppData\\\\Local\\\\Temp\\\\lab-run-tx_6ymt4\\\\workspace\\\\errors.json'"
     }
   ]
 }
