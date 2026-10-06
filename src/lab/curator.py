@@ -4,10 +4,12 @@ Pseudo-code: guides/pseudocode/04_curator.md
 Kiểm tra:    pytest tests/test_04_curator.py
 Chạy thật:   python -m lab.curator
 """
+import json
 import re
 from pathlib import Path
 
-from .tasks import eval_markers   # có sẵn: định danh của tác vụ đánh giá, tính lúc chạy
+from .model import make_model
+from .tasks import ROOT, eval_markers   # có sẵn: định danh của tác vụ đánh giá, tính lúc chạy
 
 # ---- CÓ SẴN, KHÔNG SỬA: kiểm tra và tách khối skill (phần dễ sai và liên quan bảo mật) ----------------
 SAFE_NAME = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -68,8 +70,68 @@ def curate_skills(results_dir="results", source_condition="baseline", out_dir=No
     model mặc định: make_model() (lab.model).
     Trả về: danh sách đường dẫn SKILL.md đã ghi.
     """
-    raise NotImplementedError("TODO: cài đặt curate_skills (xem guides/pseudocode/04_curator.md)")
+    out_dir = Path(out_dir) if out_dir is not None else ROOT / "skills" / "auto"
 
+    runs = []
+    condition_dir = Path(results_dir) / source_condition
+    for run_path in sorted(condition_dir.glob("*/run.json")):
+        run = json.loads(run_path.read_text(encoding="utf-8"))
+        if run.get("role") != "learn":
+            continue
+
+        failed = [
+            {"name": check.get("name", ""), "detail": check.get("detail", "")}
+            for check in run.get("checks", [])
+            if not check.get("passed", False)
+        ]
+        trace_path = run_path.parent / "trace.md"
+        trace = trace_path.read_text(encoding="utf-8")[-6000:] if trace_path.exists() else ""
+        runs.append({"task": run.get("task", run_path.parent.name), "failed": failed, "trace": trace})
+
+    if not any(run["failed"] for run in runs):
+        print("Warning: không có check thất bại ở tác vụ học")
+        return []
+
+    prompt = (
+        "You write skills for a programming and data-analysis agent.\n"
+        "Below are failed checks (names and grader feedback) and traces from learning-task runs.\n"
+        "Identify general PROCEDURAL mistakes, not task-specific answers, and write at most "
+        f"{max_skills} short skill(s) to prevent those mistakes on NEW tasks of the same kind.\n\n"
+        "Rules:\n"
+        "- Skills must be general: do not mention task IDs, task-specific filenames, answers, or numbers.\n"
+        "- Each skill must have YAML frontmatter with `name` (lowercase words separated by hyphens) and `description` "
+        "(one sentence explaining when to use it).\n"
+        "- After the frontmatter, write no more than 40 lines of imperative instructions; checklists work well.\n"
+        "- Output exactly this format for each skill:\n"
+        "=== SKILL: <name> ===\n"
+        "---\n"
+        "name: <name>\n"
+        "description: <when to use>\n"
+        "---\n"
+        "<instructions>\n"
+        "=== END ===\n\n"
+        "Learning runs:\n"
+    )
+    for run in runs:
+        prompt += (
+            f"\n### Learning task: {run['task']}\n"
+            f"Failed checks:\n{json.dumps(run['failed'], ensure_ascii=False, indent=2)}\n"
+            f"Trace (last 6000 characters):\n{run['trace']}\n"
+        )
+
+    reply = (model or make_model()).invoke(prompt).content
+    written = []
+    for name, text in parse_skill_blocks(reply):
+        if len(written) >= max_skills:
+            break
+        if validate_skill(text, expected_name=name):
+            continue
+        skill_path = out_dir / name / "SKILL.md"
+        skill_path.parent.mkdir(parents=True, exist_ok=True)
+        skill_path.write_text(text, encoding="utf-8")
+        written.append(skill_path)
+
+    return written
 
 if __name__ == "__main__":
     for p in curate_skills():
