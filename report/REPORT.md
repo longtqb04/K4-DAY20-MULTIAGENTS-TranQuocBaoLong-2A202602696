@@ -11,7 +11,7 @@
 - Mô hình (tên deployment hoặc `LAB_MODEL`), nhiệt độ (`LAB_TEMPERATURE`), `recursion_limit`: LAB_MODEL=openai:gpt-4o-mini, LAB_TEMPERATURE=0,
 - Phiên bản Deep Agents (`pip show deepagents`), hệ điều hành, chạy trực tiếp hay trong Docker: chạy trực tiếp
 - Số lần chạy tác vụ đã dùng / ngân sách:
-- Commit của tag `freeze`:
+- Commit của tag `freeze`: 
 
 ## 2. Giả thuyết (commit TRƯỚC tag `freeze`, Phần 4.0)
 
@@ -95,31 +95,59 @@ Nhận xét: Nhóm G chiếm đa số (14/25 check thất bại), chủ yếu do
 > Dán nội dung `report/table.md` và kết quả `python scripts/check_breakdown.py`. Nêu các lần chạy có `error` hoặc `skills_modified = true` (nếu có) và cách xử lý.
 
 ```text
-(dán bảng ở đây)
+| Task | baseline | subagents | skills-auto |
+|---|---|---|---|
+| code-learn | 2/10 | 4/10 | 3/10 |
+| data-learn | 0/8 | 1/8 | 0/8 |
+| logs-learn | 0/9 | 1/9 | 0/9 |
+| code-eval | 0/11 | 1/11 | 0/11 |
+| data-eval | 1/9 | 4/9 | 0/9 |
+| logs-eval | 2/10 | 1/10 | 1/10 |
+| **Mean score - learning tasks** | 0.07 | 0.21 | 0.10 |
+| **Mean score - evaluation tasks** | 0.10 | 0.21 | 0.03 |
+| **Mean tokens per run** | 87,966 | 107,933 | 29,296 |
+| **Runs that read a skill** | 0/6 | 0/6 | 0/6 |
+
+condition     role    technical  house rules  mean tokens  read a skill
+baseline      learn     2/18         0/9          152,492      0/3     
+subagents     learn     6/18         0/9           60,593      0/3  
 ```
+
+Các run có `error` và cách xử lý:
+
+- `baseline/data-learn` và `subagents/data-eval` kết thúc bằng `GraphRecursionError` ở `recursion_limit=60`. `subagents/data-eval` vẫn được chấm `4/9` trên workspace dở dang; `calls=0` là giới hạn ghi trace khi `invoke` ném lỗi, không có nghĩa là agent không chạy. Theo GUIDE, cần chạy lại riêng tác vụ lỗi; nếu lỗi lặp lại, ghi nhận kết quả là không hoàn tất và không xem điểm một phần là lần chạy thành công. Tăng recursion limit chỉ nên làm có chủ đích vì có thể tăng token và làm giảm tính so sánh.
+- `skills-auto/code-learn` lần đầu timeout, lần chạy lại báo `OpenAIConnectionError` và vẫn có `error`; điểm `3/10` cùng token của lần này là kết quả một phần, chưa phải lần chạy hoàn tất. Kiểm tra kết nối mạng, endpoint và trạng thái API bằng một yêu cầu nhỏ; sau khi kết nối ổn định, chạy lại riêng task này. Lần chạy lại các task `skills-auto` khác đã hết lỗi: `code-eval`, `data-learn`, `logs-eval` và `logs-learn`.
+- `skills-auto/data-eval` không có lỗi runtime nhưng đạt `0/9`; đây là kết quả điểm thấp, không phải lỗi kết nối. Tất cả run `skills-auto` có `skills_read=0`, vì vậy chưa có bằng chứng agent đã đọc và áp dụng skill.
+- Không run nào có `skills_modified=true`; không cần xử lý skill bị sửa trong lúc chạy.
 
 ## 8. Phân tích
 
 > Trả lời từng câu bằng số liệu từ mục 7 và bằng chứng từ vết. Kết quả âm hoặc không có khác biệt vẫn hợp lệ nếu được phân tích tốt.
 
 1. So với `baseline`, điều kiện nào cải thiện điểm tác vụ **học**? Điều kiện nào cải thiện điểm tác vụ **đánh giá**? Có điều kiện nào cải thiện tác vụ học nhưng không cải thiện tác vụ đánh giá? Nếu có, đó là dấu hiệu gì?
+> `subagents` cao hơn `baseline` ở học (0,21 so với 0,07) và đánh giá (0,21 so với 0,10). `skills-auto` cao hơn nhẹ ở học (0,10 so với 0,07) nhưng thấp hơn ở đánh giá (0,03 so với 0,10), có thể gợi ý quá khớp. Tuy nhiên, không run `skills-auto` nào đọc skill (`skills_read=0/6`), nên chênh lệch này không chứng minh hiệu quả hay tác hại của skill; thêm vào đó, `subagents/data-eval` lỗi recursion và điểm 4/9 chỉ là trạng thái một phần.
 2. Tách điểm thành check kỹ thuật và check quy ước (`rule_`). Skill do curator sinh giúp nhóm check nào? Check quy ước **mới** của tác vụ đánh giá có được skill giúp không, và vì sao?
+> Theo `check_breakdown.py`, số check kỹ thuật đạt là baseline 2/18 học, 2/18 đánh giá; subagents 6/18 ở cả hai vai trò; skills-auto 3/18 học và 1/18 đánh giá. Check quy ước đạt lần lượt là 0/9 và 1/12 ở baseline, 0/9 và 0/12 ở subagents, 0/9 và 0/12 ở skills-auto. Vì không run nào đọc skill, chưa có bằng chứng skill giúp nhóm check nào. Các quy ước mới ở tác vụ đánh giá cũng không được skills-auto đạt; nguyên nhân có thể thấy trực tiếp là skill chưa được đọc (`skills_read=0`), không thể kết luận nội dung skill đã được áp dụng nhưng thất bại. 
 3. Dựa vào vết và `skills_read`, giải thích một check mà skill giúp đạt và một check mà skill không giúp (skill chưa được đọc, đọc nhưng không làm theo, skill thiếu hoặc sai).
+> Không thể nêu check nào được skill giúp đạt vì cả sáu run skills-auto đều `skills_read=0`. Ví dụ, `rule_type_hints` vẫn fail ở `skills-auto/code-eval` và `rule_changelog` fail ở `skills-auto/code-learn`; các run không đọc `follow-test-protocols` hoặc `verify-code-syntax`. Đây là trường hợp skill chưa được đọc, không phải bằng chứng skill được đọc nhưng làm theo sai.
 4. Chi phí: so sánh số token trung bình giữa các điều kiện. Điều kiện nào có hiệu quả tốt nhất theo điểm trên mỗi token? Đa tác tử có đáng chi phí trong thí nghiệm này không?
+> Token trung bình mỗi run là 87.966 baseline, 107.933 subagents và 29.296 skills-auto. Tỷ lệ thô số check đạt trên một triệu token lần lượt khoảng 9,47; 18,53; 22,76, nên skills-auto có tỷ lệ thô cao nhất nhưng điểm tuyệt đối thấp và gồm run lỗi; mọi tỷ lệ đều bị ảnh hưởng bởi `baseline/data-learn` (368.860 token, GraphRecursionError), `subagents/data-eval` (407.461 token, GraphRecursionError) và `skills-auto/code-learn` (lỗi kết nối). Chỉ một trong sáu run subagents gọi subagent (data-learn); mean token cao hơn baseline khoảng 22,7%, nên thí nghiệm này chưa cho thấy đa tác tử đáng chi phí một cách ổn định.
 5. Có dấu hiệu rò rỉ dữ liệu hoặc quá khớp nào trong skill sinh ra không? Nhóm đã phòng tránh như thế nào?
+> Ba skill hiện có mô tả quy trình chung cho import, kiểm thử và cú pháp, không thấy tên file/dữ liệu riêng của eval; curator chỉ lấy run `learn` và validator loại marker của eval. `verify_freeze.py` không báo skill thay đổi, hash run lệch, run trước freeze hay `skills_modified=true`, nhưng báo thiếu commit `hypotheses` trước tag, nên quy trình đóng băng chưa được xác minh hoàn toàn. `skills-auto` cao hơn baseline ở học nhưng thấp hơn ở eval có vẻ giống quá khớp, song vì skills không được đọc nên chưa thể quy kết cho skill.
 6. Nhiễu: so sánh điểm tác vụ học của cùng bộ skill ở Phần 3.4 (đã sao lưu) và sau đóng băng. Chênh lệch bao nhiêu? Nó cho biết điều gì về độ tin cậy của các chênh lệch trong bảng ở mục 7?
+> Không có run/trace học `skills-auto` được lưu riêng trước khi chạy chính thức; vì thế không tính được chênh lệch điểm cùng bộ skill trước/sau freeze. Không thể dùng số hiện tại thay cho snapshot 3.4; thiếu bản đối chiếu làm giảm độ tin cậy của kết luận về nhiễu và hiệu quả học.
 
 ## 9. Hạn chế và tính hợp lệ
 
 > Nêu ít nhất 3 hạn chế và ảnh hưởng của từng hạn chế đến kết luận (ví dụ: chỉ 3 tác vụ mỗi vai trò, mỗi cấu hình chạy một lần, nhiễu của mô hình, tác vụ do giảng viên thiết kế sẵn quy ước, chỉ một mô hình).
 
-1.
-2.
-3.
+1. Chỉ có ba tác vụ học và ba tác vụ đánh giá, mỗi cấu hình chạy một lần; chênh lệch có thể do đặc điểm từng task hoặc ngẫu nhiên của mô hình, chưa đại diện cho hiệu quả ổn định.
+2. Có run lỗi recursion/kết nối nhưng vẫn được chấm trên workspace một phần và được tính vào bảng; các điểm trung bình và tỷ lệ điểm/token vì vậy không hoàn toàn so sánh được.
+3. Không lưu snapshot Phần 3.4 và toàn bộ `skills_read` bằng 0; không kiểm nghiệm được liệu skill có được chọn đọc, làm theo, hay ảnh hưởng đến điểm.
 
 ## 10. Kết luận
 
-> Tối đa 5 câu. Chỉ khẳng định điều số liệu hỗ trợ. Nêu một đề xuất cải tiến tiếp theo.
+> Trong các run hiện có, `subagents` đạt điểm trung bình cao hơn baseline ở cả học (0.21 so với 0.07) và đánh giá (0.21 so với 0.10), nhưng một run đánh giá bị `GraphRecursionError`. `skills-auto` đạt 0.10 ở học và 0.03 ở đánh giá, nhưng không run nào đọc skill nên chưa thể kết luận về tác dụng của skill. Các lỗi API và recursion cùng số lượng tác vụ nhỏ làm giảm độ tin cậy của so sánh. Thí nghiệm tiếp theo nên lưu snapshot Phần 3.4, bảo đảm commit giả thuyết trước tag freeze, ổn định kết nối và lặp mỗi cấu hình nhiều lần.
 
 ## Phụ lục
 
