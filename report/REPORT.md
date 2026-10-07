@@ -11,7 +11,7 @@
 - Mô hình (tên deployment hoặc `LAB_MODEL`), nhiệt độ (`LAB_TEMPERATURE`), `recursion_limit`: LAB_MODEL=openai:gpt-4o-mini, LAB_TEMPERATURE=0,
 - Phiên bản Deep Agents (`pip show deepagents`), hệ điều hành, chạy trực tiếp hay trong Docker: chạy trực tiếp
 - Số lần chạy tác vụ đã dùng / ngân sách:
-- Commit của tag `freeze`: 
+- Commit của tag `freeze`: c8fd20ce68fa696a3857c1e3099fb167e46c6c2f
 
 ## 2. Giả thuyết (commit TRƯỚC tag `freeze`, Phần 4.0)
 
